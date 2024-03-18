@@ -27,8 +27,12 @@ def create_doc(case,plant,powertrain,car):
     file_cadic=file_cadic.replace("\\","/")
     data_return=query_data(str(car).upper(),plant,powertrain,case,"ALL","ALL")
     link_spec,dict_group_karenhyo3,dict_group_karenhyo4=get_group_karenhyo34(folder_data,car)
-    if link_spec==None or len(dict_group_karenhyo3)==0 or len(dict_group_karenhyo4)==0 or data_return[0]==None:
-        return "Check input again!!!"
+    if data_return[0]==None:
+        return "Data cadics not exist in database!"
+    if link_spec==None:
+        return "File Specification not exist!"
+    if link_spec==None or len(dict_group_karenhyo3)==0 and len(dict_group_karenhyo4)==0:
+        return "Lack of 関連表③, 関連表④"
 #==========================Du lieu tong=====================================
     cadics_all=data_return[1]
     

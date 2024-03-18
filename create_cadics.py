@@ -41,6 +41,7 @@ def create_cadics(case, market, powertrain, car):
     adddress_config, frame_header,dict_grade, max_car,dict_optioncode = get_infor_car(data_spec)
     dict_except_config = lot_except_config(data_spec)
 
+
     for group in dic_group_karenhyo12.keys():
         file_karenhyo_1=dic_group_karenhyo12[group][0]
         file_karenhyo_2=dic_group_karenhyo12[group][1]

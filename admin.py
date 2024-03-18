@@ -41,44 +41,50 @@ def admin():
             col_left_spec_grid = grid(2,2,vertical_align="top")
             set_data("running",0)   
             if col_left_spec_grid.form_submit_button("View Data", use_container_width=True) and get_data("running")==0:
-                set_data("running",1)
-                session, data, project_id, app_list=query_data(str(st.session_state.code).upper(),st.session_state.plant,st.session_state.pwt,st.session_state.case,"ALL",st.session_state.lot)
-                set_data("data_cadics",data)
-                set_state_db(session,project_id,app_list)
-                list_file,folder_output,name_zip=check_file_out(st.session_state.code,st.session_state.pwt,st.session_state.plant,st.session_state.case)
-                set_state(list_file,folder_output,name_zip)
-                set_data("running",0)    
-
+                with st.spinner(text="In progress..."):
+                    set_data("running",1)
+                    session, data, project_id, app_list=query_data(str(st.session_state.code).upper(),st.session_state.plant,st.session_state.pwt,st.session_state.case,"ALL",st.session_state.lot)
+                    set_data("data_cadics",data)
+                    set_state_db(session,project_id,app_list)
+                    list_file,folder_output,name_zip=check_file_out(st.session_state.code,st.session_state.pwt,st.session_state.plant,st.session_state.case)
+                    set_state(list_file,folder_output,name_zip)
+                    set_data("running",0)    
+                st.write("Completed!!!")
             if files is not None and col_left_spec_grid.form_submit_button("Load File", use_container_width=True) and get_data("running")==0:
                 set_data("running",1) 
-                update_file_into_server(st.session_state.code, files, csrf_token)
-                set_data("running",0)
+                with st.spinner(text="In progress..."):
+                    update_file_into_server(st.session_state.code, files, csrf_token)
+                    set_data("running",0)
                 
             if col_left_spec_grid.form_submit_button("Create Cadics", use_container_width=True)==True and get_data("running")==0 :
                 # if st.form_submit_button("Confirm Create Cadics", use_container_width=True)==True:
                 set_data("running",1) 
                 #st.write(st.session_state.case,st.session_state.plant,st.session_state.pwt,st.session_state.code)
-                notice,session, data, project_id, app_list=create_cadics(st.session_state.case,st.session_state.plant,st.session_state.pwt,st.session_state.code)
-                #notice,session, data, project_id, app_list=[None,None,None,None,None]
-                set_data("data_cadics",data)
-                set_state_db(session,project_id,app_list)
+                with st.spinner(text="In progress..."):
+                    notice,session, data, project_id, app_list=create_cadics(st.session_state.case,st.session_state.plant,st.session_state.pwt,st.session_state.code)
+                    #notice,session, data, project_id, app_list=[None,None,None,None,None]
+                    set_data("data_cadics",data)
+                    set_state_db(session,project_id,app_list)
+                    list_file,folder_output,name_zip=check_file_out(st.session_state.code,st.session_state.pwt,st.session_state.plant,st.session_state.case)
+                    set_state(list_file,folder_output,name_zip)
+                    set_data("running",0)
                 st.write(notice)
-                list_file,folder_output,name_zip=check_file_out(st.session_state.code,st.session_state.pwt,st.session_state.plant,st.session_state.case)
-                set_state(list_file,folder_output,name_zip)
-                set_data("running",0)
+                
             if col_left_spec_grid.form_submit_button("Create Outputs", use_container_width=True) and get_data("running")==0:
                 set_data("running",1) 
-                notice=create_doc(st.session_state.case,st.session_state.plant,st.session_state.pwt,st.session_state.code)
+                with st.spinner(text="In progress..."):
+                    notice=create_doc(st.session_state.case,st.session_state.plant,st.session_state.pwt,st.session_state.code)
+                    list_file,folder_output,name_zip=check_file_out(st.session_state.code,st.session_state.pwt,st.session_state.plant,st.session_state.case)
+                    set_state(list_file,folder_output,name_zip)
+                    set_data("running",0)
                 st.write(notice)
-                list_file,folder_output,name_zip=check_file_out(st.session_state.code,st.session_state.pwt,st.session_state.plant,st.session_state.case)
-                set_state(list_file,folder_output,name_zip)
-                set_data("running",0)
 
             if st.form_submit_button("Update File Cadics", use_container_width=True) and get_data("running") == 0:
                 set_data("running",1) 
-                notice=update_file_after_edit(st.session_state.code, st.session_state.pwt, st.session_state.plant,
-                                       st.session_state.case, files, csrf_token,st.session_state.name_user)
-                set_data("running",0)
+                with st.spinner(text="In progress..."):
+                    notice=update_file_after_edit(st.session_state.code, st.session_state.pwt, st.session_state.plant,
+                                        st.session_state.case, files, csrf_token,st.session_state.name_user)
+                    set_data("running",0)
                 st.write(notice)
     with col_right:
         # BANNER RIGHT

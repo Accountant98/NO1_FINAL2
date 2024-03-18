@@ -37,17 +37,18 @@ def user_read_only():
             st.header("View Box")
             col_left_spec_grid = grid(1,vertical_align="top")
             if col_left_spec_grid.form_submit_button("View Data", use_container_width=True):
-                list_file,folder_output,name_zip=check_file_out(st.session_state.code,st.session_state.pwt,st.session_state.plant,st.session_state.case)
-                set_data("folder_output",folder_output)
-                set_data("name_zip",name_zip)
-                session, data, project_id, app_list=query_data(st.session_state.code,st.session_state.plant,st.session_state.pwt,st.session_state.case,"ALL",st.session_state.lot)
-                set_data("data_cadics",data)
-                set_state_db(session,project_id,app_list)
-                list_link=["Car配車要望表","WTC仕様用途一覧表","WTC要望集約兼チェックリスト","実験部品","特性管理部品リスト","File Log.xlsx"]
-                for index in range(len(list_link)):
-                    set_data(list_link[index],list_file[index])
-                    set_data("flag_view",1)
-
+                with st.spinner(text="In progress..."):
+                    list_file,folder_output,name_zip=check_file_out(st.session_state.code,st.session_state.pwt,st.session_state.plant,st.session_state.case)
+                    set_data("folder_output",folder_output)
+                    set_data("name_zip",name_zip)
+                    session, data, project_id, app_list=query_data(st.session_state.code,st.session_state.plant,st.session_state.pwt,st.session_state.case,"ALL",st.session_state.lot)
+                    set_data("data_cadics",data)
+                    set_state_db(session,project_id,app_list)
+                    list_link=["Car配車要望表","WTC仕様用途一覧表","WTC要望集約兼チェックリスト","実験部品","特性管理部品リスト","File Log.xlsx"]
+                    for index in range(len(list_link)):
+                        set_data(list_link[index],list_file[index])
+                        set_data("flag_view",1)
+                st.write("Completed!!!")
             #BANNER RIGHT
             with col_right:
                 col_r1, col_r2 = st.columns([2,1])
@@ -77,8 +78,9 @@ def view(position):
                     data_edit=button_select_caout_grid.data_editor(get_data("data_cadics"),height=525)
                     with row_butt[3]:
                         if st.button("SAVE",use_container_width=True):
-                            update_edit(data_edit,get_data("session"),get_data("data_cadics"),get_data("project_id"),get_data("app_list"))
-                            set_data("data_cadics",data_edit)
+                            with st.spinner(text="In progress..."):
+                                update_edit(data_edit,get_data("session"),get_data("data_cadics"),get_data("project_id"),get_data("app_list"))
+                                set_data("data_cadics",data_edit)
                             st.write("Save Completed!!!")
                 else:
                     button_select_caout_grid.dataframe(get_data("data_cadics"),height=525)
