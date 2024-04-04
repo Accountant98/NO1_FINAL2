@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.18, for Win64 (x86_64)
 --
--- Host: 10.192.85.133    Database: db_21xe_clone
+-- Host: localhost    Database: db_21xe_clone
 -- ------------------------------------------------------
 -- Server version	8.0.18
 
@@ -32,7 +32,7 @@ CREATE TABLE `app` (
   `handle` varchar(45) DEFAULT NULL,
   `app` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id_app`)
-) ENGINE=InnoDB AUTO_INCREMENT=561 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=693 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -184,8 +184,10 @@ CREATE TABLE `header` (
   `col128` varchar(100) DEFAULT NULL,
   `col129` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=283 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `fk_project_header_idx` (`id_project`),
+  CONSTRAINT `fk_header_project` FOREIGN KEY (`id_project`) REFERENCES `project` (`id_project`) ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=433 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -346,7 +348,7 @@ CREATE TABLE `main_table` (
   KEY `FK_id_app_idx` (`id_app`),
   CONSTRAINT `FK_id_app` FOREIGN KEY (`id_app`) REFERENCES `app` (`id_app`) ON UPDATE CASCADE,
   CONSTRAINT `FK_id_project` FOREIGN KEY (`id_project`) REFERENCES `project` (`id_project`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1135733 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1149989 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -373,7 +375,7 @@ CREATE TABLE `project` (
   `develop_case` varchar(45) NOT NULL,
   PRIMARY KEY (`id_project`),
   UNIQUE KEY `id_UNIQUE` (`id_project`)
-) ENGINE=InnoDB AUTO_INCREMENT=71 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=95 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -395,13 +397,13 @@ DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(50) NOT NULL,
-  `password` varchar(50) NOT NULL,
+  `password` varchar(255) DEFAULT NULL,
   `permission` varchar(45) DEFAULT NULL,
-  `date` datetime DEFAULT NULL,
+  `project` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   UNIQUE KEY `username_UNIQUE` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -410,7 +412,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'ADMIN_H61A','12345678','admin',NULL),(2,'STAFF_1','12345678','staff',NULL),(3,'ADMIN','12345678','master',NULL),(5,'STAFF_2','12345678','staff',NULL),(12,'ADMIN_WZ1J','12345678','admin',NULL),(13,'ADMIN_P02A','12345678','admin',NULL),(14,'ADMIN_PO2F','12345678','admin',NULL);
+INSERT INTO `user` VALUES (1,'ADMIN_H61A','ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f','admin','H61A'),(2,'STAFF_1','ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f','staff','H61A'),(3,'ADMIN','ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f','master','ALL'),(5,'STAFF_2','ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f','staff','H61A'),(12,'ADMIN_WZ1J','ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f','admin','WZ1J'),(13,'ADMIN_P02A','ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f','admin','P02A'),(14,'ADMIN_PO2F','ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f','admin','PO2F'),(18,'STAFF_3','ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f','staff','WZ1J'),(27,'nam','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92','staff','WZ1J');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -423,4 +425,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-03-07 14:45:54
+-- Dump completed on 2024-04-04 16:21:37

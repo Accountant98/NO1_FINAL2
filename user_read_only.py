@@ -41,7 +41,7 @@ def user_read_only():
                     list_file,folder_output,name_zip=check_file_out(st.session_state.code,st.session_state.pwt,st.session_state.plant,st.session_state.case)
                     set_data("folder_output",folder_output)
                     set_data("name_zip",name_zip)
-                    session, data, project_id, app_list=query_data(st.session_state.code,st.session_state.plant,st.session_state.pwt,st.session_state.case,"ALL",st.session_state.lot)
+                    session, data, project_id, app_list=query_data(st.session_state.code,st.session_state.plant,st.session_state.pwt,st.session_state.case,st.session_state.dev,st.session_state.lot)
                     set_data("data_cadics",data)
                     set_state_db(session,project_id,app_list)
                     list_link=["Car配車要望表","WTC仕様用途一覧表","WTC要望集約兼チェックリスト","実験部品","特性管理部品リスト","File Log.xlsx"]
@@ -136,7 +136,7 @@ def view(position):
             if get_data("link")!=None and get_data("link")!="cadics":
                 with open(get_data("link"), "rb") as fp:
                     st.download_button(
-                        label="Download file current",
+                        label="Download File",
                         data=fp,
                         file_name=get_data("name"),
                         mime="text/plain",
@@ -144,7 +144,7 @@ def view(position):
                     )
             elif get_data("link")=="cadics" and len(get_data("data_cadics").columns)>31:
                     bool=st.download_button(
-                        label="Download file current",
+                        label="Download File",
                         data=get_data("data_cadics").to_csv(index=None,header=None),
                         file_name="CADICS_ALL.csv",
                         mime="text/csv",
@@ -159,7 +159,7 @@ def view(position):
                 #zip_folder(get_data("folder_output"),get_data("folder_output")+".zip")
                 with open(get_data("folder_output")+".zip", "rb") as fp:
                     st.download_button(
-                        label="Download all file",
+                        label="Download All",
                         data=fp,
                         file_name=get_data("name_zip"),
                         mime="application/zip",

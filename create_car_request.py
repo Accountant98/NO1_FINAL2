@@ -36,14 +36,14 @@ def create_car_request(data_cadics, data_kanrenhyo,car_number,lot,start_table3,e
                         dict_data[key_start]="*"
                     key_start=key_start+1
                 
-                dict_data[36]=data_frame.iat[row,car_number]
-                dict_data[50]=id_mail
-                dict_data[51]=kca_proj+str(evaluation)
-                dict_data[52]=id_mail
-                dict_data[53]=kca_proj+str(evaluation)
-                dict_data[54]="NML"
-                dict_data[55]="NML"
-                dict_data[56]=str(data_kanrenhyo.iat[26,col]).upper()
+                dict_data[136]=data_frame.iat[row,car_number]
+                dict_data[150]=id_mail
+                dict_data[151]=kca_proj+str(evaluation)
+                dict_data[152]=id_mail
+                dict_data[153]=kca_proj+str(evaluation)
+                dict_data[154]="NML"
+                dict_data[155]="NML"
+                dict_data[156]=str(data_kanrenhyo.iat[26,col]).upper()
 
                 list_dict.append(dict_data)
     return list_dict

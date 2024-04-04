@@ -15,7 +15,7 @@ from funtion_database import query_data
 from read_data_view import zip_folder
 #dic_test={ "XQ2":[1,"【サンプル】XXQ2関連表1_B(車体音振).xlsx","【サンプル】XXQ2関連表2_B(車体音振).xlsx","【サンプル】XXQ2関連表3_B(車体音振) .xlsx","【サンプル】XXQ2関連表4_B(車体音振) .xlsx",4,"【サンプル】仕様表_L21C.xlsx"],"XQ4":[1,"【サンプル】XXQ4関連表1_B(車体音振).xlsx","【サンプル】XXQ4関連表2_B(車体音振).xlsx","【サンプル】XXQ4関連表3_B(車体音振).xlsx","【サンプル】XXQ4関連表4_B(車体音振).xlsx",4,"【サンプル】仕様表_L21C.xlsx"]}
 
-def create_doc(case,plant,powertrain,car):
+def create_doc(case,plant,powertrain,car,list_group):
 #===========================load_infomation_input==========================
     working = os.path.dirname(__file__)
     folder_name=str(car).upper()+"_"+powertrain+"_"+plant+"_"+case
@@ -25,8 +25,9 @@ def create_doc(case,plant,powertrain,car):
     folder_out=folder_out.replace("\\","/")
     file_cadic=os.path.join(folder_out,"CADICS_ALL.csv")
     file_cadic=file_cadic.replace("\\","/")
-    data_return=query_data(str(car).upper(),plant,powertrain,case,"ALL","ALL")
-    link_spec,dict_group_karenhyo3,dict_group_karenhyo4=get_group_karenhyo34(folder_data,car)
+    tuple_group=tuple(list_group)
+    data_return=query_data(str(car).upper(),plant,powertrain,case,tuple_group,"ALL")
+    link_spec,dict_group_karenhyo3,dict_group_karenhyo4=get_group_karenhyo34(folder_data,car,list_group)
     if data_return[0]==None:
         return "Data cadics not exist in database!"
     if link_spec==None:
@@ -53,6 +54,7 @@ def create_doc(case,plant,powertrain,car):
     for group,link_kanrenhyo_3 in dict_group_karenhyo3.items():
         list_lot=get_lot_karen(link_kanrenhyo_3)
         for lot in list_lot:
+            #print(lot, group)
             #===================read input using pandas======================
             data_cadics = filter_cadic(lot, group,cadics_all,car_number) #filter cadics base on lot group
             sheet_name="関連表"+lot
@@ -96,7 +98,7 @@ def write_excel(folder_out,my_dict_car_request,frame_data_car,my_dict_request_li
     link_file_wtc_spec=folder_out+"/WTC仕様用途一覧表.xlsx"
     link_buhin=folder_out+"/実験部品.xlsx"
     link_buhin_list=folder_out+"/特性管理部品リスト.xlsx"
-    form_car_request= [{i: None for i in range(0, 60)}]
+    form_car_request= [{i: None for i in range(0, 160)}]
     with pd.ExcelWriter(link_file_car_request, engine='openpyxl', mode="a",if_sheet_exists="overlay") as writer:
         for lot in my_dict_car_request.keys():
             if len(my_dict_car_request[lot])>0:
@@ -134,12 +136,12 @@ def write_excel(folder_out,my_dict_car_request,frame_data_car,my_dict_request_li
                 list_dict_w=form_wtc_spec+my_dict_wtc_spec[lot]["w"]
                 frame_w=pd.DataFrame(list_dict_w)
                 frame_w=frame_w.drop(0)
-                frame_w.to_excel(writer, sheet_name=lot, index=None, header=None, startcol=6, startrow=67)
+                frame_w.to_excel(writer, sheet_name=lot, index=None, header=None, startcol=6, startrow=121)
             if len(my_dict_wtc_spec[lot]["c"])>0:
                 list_dict_c=form_wtc_spec+my_dict_wtc_spec[lot]["c"]
                 frame_c=pd.DataFrame(list_dict_c)
                 frame_c=frame_c.drop(0)
-                frame_c.to_excel(writer, sheet_name=lot, index=None, header=None, startcol=6, startrow=87)
+                frame_c.to_excel(writer, sheet_name=lot, index=None, header=None, startcol=6, startrow=196)
     form_buhin=[{i: None for i in range(0, 22)}]
     with pd.ExcelWriter(link_buhin, engine='openpyxl', mode="a",if_sheet_exists="overlay") as writer:
         for lot in my_dic_buhin.keys():
@@ -251,19 +253,31 @@ def get_lot(link_kanrenhyo_3,link_kanrenhyo_4):
         list_lot.append(lot)
     return list_lot
 
-def get_group_karenhyo34(folder_data,car):
+def get_group_karenhyo34(folder_data,car,list_group):
     dic_group_karenhyo3={}
     dic_group_karenhyo4={}
     if os.path.exists(folder_data)==False:
         return None, dic_group_karenhyo3,dic_group_karenhyo4
-    files = [f for f in os.listdir(folder_data) if os.path.isfile(os.path.join(folder_data, f))]
+
+    list_file=[]
+    karen_files = [f for f in os.listdir(folder_data) if f.endswith('.xlsx')]
+    # files = [f for f in os.listdir(folder_data) if os.path.isfile(os.path.join(folder_data, f))]
+    if "ALL" not in list_group:
+        for item in list_group:
+            list_filename_contain_group = [file_name for file_name in karen_files if item in file_name]
+            list_file.extend(list_filename_contain_group)
+    else:
+        list_filename_contain_group = [file_name for file_name in karen_files]
+        list_file.extend(list_filename_contain_group)
+
+
     file_name_spec="仕様表_"+str(car).upper()+".xlsx"
     link_file_spec=os.path.join(folder_data,file_name_spec)
     link_file_spec=link_file_spec.replace("\\","/")
     if os.path.exists(link_file_spec)==False:
         link_file_spec=None
 
-    for file_name in files:
+    for file_name in list_file:
         if file_name.find("関連表3")==0:
             group=file_name.replace("関連表3","関連表1")
             link_file_karenhyo=os.path.join(folder_data,file_name)

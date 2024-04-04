@@ -44,8 +44,6 @@ def update_file_after_edit(code, pwt, plant, case, file_updates, csrf_token,name
                     return "FAIL: There is no cadic references"
                 else:
                     old_data=pd.read_csv(folder_save_file_update,header=None)
-                    new_data.to_csv("aaa.csv")
-                    old_data.to_csv("bbb.csv")
                     offline_edit(str(code).upper(), plant, pwt, case,new_data,old_data)
                     return "Update Completed!!!"
 

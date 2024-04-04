@@ -15,8 +15,10 @@ from check_option import check_option
 from log_file_error import check_document
 from funtion_database import update_new
 from read_data_view import frame_empty
+from funtion_database import get_header
 
-def create_cadics(case, market, powertrain, car):
+
+def create_cadics(case, market, powertrain,car,list_group):
     working = os.path.dirname(__file__)
     folder_name = str(car).upper() + "_" + powertrain + "_" + market + "_" + case
     folder_data=os.path.join(working, "data", str(car).upper())
@@ -25,24 +27,23 @@ def create_cadics(case, market, powertrain, car):
     folder_out_check = folder_out_check.replace("\\", "/")
     if os.path.exists(folder_out_check) == False:
         os.mkdir(folder_out_check)
-    file_spec,dic_group_karenhyo12,notice=get_group_karenhyo12(folder_data,car,folder_out_check)
+
+    file_spec,dic_group_karenhyo12,notice,group_pick=get_group_karenhyo12(folder_data,car,folder_out_check,list_group)
     if file_spec==None or len(dic_group_karenhyo12)==0:
         return "Check input again!!!",None,frame_empty(),None,None
     # ===========================set link output=============================
     #link_cadic = folder_out_check+"/"+ "CADICS_ALL.csv"
-
-    my_dict_data = [{i: None for i in range(1, 180)}]
+    #my_dict_data = [{i: None for i in range(1, 180)}]
     data_spec = pd.read_excel(file_spec, sheet_name="Sheet1", header=None)
-
-    data_spec = data_spec.applymap(lambda x: normalize_japanese_text(x).lower() if isinstance(x, str) else x)
-    
+    data_spec = data_spec.applymap(lambda x: normalize_japanese_text(x).lower() if isinstance(x, str) else x)    
     body_type=data_spec.iat[3,4]
     # ========================Create File Output=============================
     adddress_config, frame_header,dict_grade, max_car,dict_optioncode = get_infor_car(data_spec)
+    my_dict_data = [{i: None for i in range(1, 180)}]
     dict_except_config = lot_except_config(data_spec)
 
-
     for group in dic_group_karenhyo12.keys():
+        #print(group)
         file_karenhyo_1=dic_group_karenhyo12[group][0]
         file_karenhyo_2=dic_group_karenhyo12[group][1]
         data_karenhyo1 = pd.read_excel(file_karenhyo_1, sheet_name="関連表", header=None)
@@ -54,7 +55,8 @@ def create_cadics(case, market, powertrain, car):
         data_karenhyo2 = data_karenhyo2.map(lambda x: normalize_japanese_text(x).lower() if isinstance(x, str) else x)
         dic_lot = get_lot(file_karenhyo_1, powertrain, market, case)  # contain
         flag_all,address_zone=condition_zone_check(data_karenhyo2,adddress_config)
-        common_option,dict_kep=check_option(data_karenhyo2,file_spec)
+        common_option,dict_kep=check_option(data_karenhyo2,data_spec,max_car)
+        #print(common_option)
         list_infor = get_infor_fixed_group(data_karenhyo2)
         # ========================================================================
         for lot in dic_lot.keys():
@@ -69,8 +71,9 @@ def create_cadics(case, market, powertrain, car):
                     my_dict_data = my_dict_data + list_dic_records
 
 
-    frame_data=edit_dataframe(my_dict_data, frame_header)
-    session, data, project_id, app_list=update_new(str(car).upper(),market,powertrain,case,frame_data)
+    frame_data=edit_dataframe(my_dict_data, frame_header,case, market, powertrain,car)
+    #frame_data.to_csv("cadic.csv",index=None, header=None)
+    session, data, project_id, app_list=update_new(str(car).upper(),market,powertrain,case,frame_data,group_pick)
     return notice,session, data, project_id, app_list
 
 
@@ -286,6 +289,7 @@ def cal_option(dic_opt,codition_zone):
 """fuction: pick_car(data_karenhyo,dict_except_config,cadic_no,adddress_config,group,lot,data_spec,infor_fix)
 -Description: pick 1,*
 """
+
 def pick_car(data_karenhyo, dict_except_config, cadic_no, adddress_config, group, lot, data_spec, 
             infor_fix,address_zone,dict_grade,common_option,max_car,dict_optioncode,flag_all,dict_kep):
     col_zone, row_opt, row_item,row_class = infor_fix
@@ -586,18 +590,32 @@ def list_config_all_(car_list, data_spec, list_config_lot,dict_grade_zone,common
 -Input: my_dic_data,file_name,frame_header
 -Output: write data in file csv
 """
-def edit_dataframe(my_dic_data, frame_header):
+def edit_dataframe(my_dic_data, frame_header,develop_case, market, powertrain,project_name):
+
     frame = pd.DataFrame(my_dic_data)
     frame = frame.drop(0)
     num_columns = len(frame.columns)
     column_names = [f'{i + 1}' for i in range(num_columns)]
     frame.columns = column_names
     df_sorted = frame.sort_values(by="2")
-    result = pd.concat([frame_header, df_sorted], axis=0)
-    # result.to_csv(file_name, index=False, header=None)
+
+    #result = pd.concat([frame_header, df_sorted], axis=0)
+    #==============================================================
+    header_query=get_header(project_name, market, powertrain, develop_case)
+    if type(header_query)==type(None):
+        result = pd.concat([frame_header, df_sorted], axis=0)
+        #print(result)
+    else:
+        #print("vclllll",len(header_query.columns),len(df_sorted.columns))
+        num_columns = len(header_query.columns)
+        column_names = [f'{i + 1}' for i in range(num_columns)]
+        header_query.columns = column_names
+        result = pd.concat([header_query, df_sorted], axis=0)
+
     result=result.reset_index(drop=True)
     result = pd.DataFrame(result.values, columns=None)
     data_new=merge_row_cadics(result)
+    #data_new.to_csv("data.csv")
     return data_new
 
 
@@ -640,19 +658,31 @@ def normalize_japanese_text(input_text):
         return input_text
 
 
-def get_group_karenhyo12(folder_data,car,folder_out):
+def get_group_karenhyo12(folder_data,car,folder_out,list_group):
     dic_group_karenhyo12={}
-    if os.path.exists(folder_data)==False:
-        return None, dic_group_karenhyo12
-    files = [f for f in os.listdir(folder_data) if os.path.isfile(os.path.join(folder_data, f))]
+    group_pick=[]
+    # files = [f for f in os.listdir(folder_data) if os.path.isfile(os.path.join(folder_data, f))]
     file_name_spec="仕様表_"+str(car).upper()+".xlsx"
     link_file_spec=os.path.join(folder_data,file_name_spec)
     link_file_spec=link_file_spec.replace("\\","/")
     notice=check_document(folder_data,link_file_spec,folder_out)
+    if os.path.exists(folder_data)==False:
+        return None, dic_group_karenhyo12, notice
+
     if os.path.exists(link_file_spec)==False:
         link_file_spec=None
-
-    for file_name in files:
+    #=============================================================================================
+    list_file = []
+    karen_files = [f for f in os.listdir(folder_data) if f.endswith('.xlsx')]
+    if "ALL" not in list_group:
+        for item in list_group:
+            list_filename_contain_group = [file_name for file_name in karen_files if item in file_name]
+            list_file.extend(list_filename_contain_group)
+    else:
+        list_filename_contain_group = [file_name for file_name in karen_files]
+        list_file.extend(list_filename_contain_group)
+    #=============================================================================================
+    for file_name in list_file:
         if file_name.find("関連表1")==0:
             file_karenhyo2=file_name.replace("関連表1","関連表2")
             link_file_karenhyo2=os.path.join(folder_data,file_karenhyo2)
@@ -661,5 +691,12 @@ def get_group_karenhyo12(folder_data,car,folder_out):
                 link_file_karenhyo1=os.path.join(folder_data,file_name)
                 link_file_karenhyo1=link_file_karenhyo1.replace('\\','/')
                 dic_group_karenhyo12[file_name]=[link_file_karenhyo1,link_file_karenhyo2]
+                group_pick.append(file_name)
 
-    return link_file_spec,dic_group_karenhyo12,notice
+    # print("xxxx",link_file_spec,dic_group_karenhyo12)
+    group_pick=tuple(group_pick)
+    return link_file_spec,dic_group_karenhyo12,notice,group_pick
+
+
+#================================TEST============================================================
+#create_cadics(case="CASE1", market="JPN", powertrain="EV",car="WZ1J",list_group=["ALL"])

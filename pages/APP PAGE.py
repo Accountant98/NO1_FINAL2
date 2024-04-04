@@ -16,7 +16,6 @@ if 1==1:
         if st.session_state.position=="admin" or st.session_state.position=="master": #st.session_state.mail:
         #------------MAIN APP-----------x
             try:
-    
                 admin()
             except Exception as e:
                 st.error(f"Error: {e}")

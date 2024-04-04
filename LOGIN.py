@@ -15,10 +15,11 @@ password = st.text_input("Password", type="password")
 
 if st.button("Login"):
     # Check if the username and password are correct
-    name_user,position=log_in(username, password)
+    name_user,position,project_query=log_in(username, password)
     if position!=None:
         st.session_state.position=position
         st.session_state.name_user=name_user
+        st.session_state.project_query=project_query
         st.success("Login successful!")
     else:
         st.session_state.position=None
