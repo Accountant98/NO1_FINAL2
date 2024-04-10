@@ -18,7 +18,7 @@ from read_data_view import frame_empty
 from funtion_database import get_header
 
 
-def create_cadics_old(case, market, powertrain, car, list_group):
+def create_cadics(case, market, powertrain,car,list_group):
     working = os.path.dirname(__file__)
     folder_name = str(car).upper() + "_" + powertrain + "_" + market + "_" + case
     folder_data=os.path.join(working, "data", str(car).upper())
@@ -39,19 +39,18 @@ def create_cadics_old(case, market, powertrain, car, list_group):
     body_type=data_spec.iat[3,4]
     # ========================Create File Output=============================
     adddress_config, frame_header,dict_grade, max_car,dict_optioncode = get_infor_car(data_spec)
-    # print(frame_header)
     my_dict_data = [{i: None for i in range(1, 180)}]
     dict_except_config = lot_except_config(data_spec)
 
     for group in dic_group_karenhyo12.keys():
-        # print(group)
+        print(group)
         file_karenhyo_1=dic_group_karenhyo12[group][0]
         file_karenhyo_2=dic_group_karenhyo12[group][1]
         data_karenhyo1 = pd.read_excel(file_karenhyo_1, sheet_name="関連表", header=None)
         data_karenhyo1 = data_karenhyo1.map(lambda x: normalize_japanese_text(x).lower() if isinstance(x, str) else x)
         data_karenhyo1_list = data_karenhyo1.values
         max_column_karenhyo1 = len(data_karenhyo1.columns)
-        # print(file_karenhyo_2)
+
         data_karenhyo2 = pd.read_excel(file_karenhyo_2, sheet_name="関連表", header=None)
         data_karenhyo2 = data_karenhyo2.map(lambda x: normalize_japanese_text(x).lower() if isinstance(x, str) else x)
         dic_lot = get_lot(file_karenhyo_1, powertrain, market, case)  # contain
@@ -73,8 +72,7 @@ def create_cadics_old(case, market, powertrain, car, list_group):
 
 
     frame_data=edit_dataframe(my_dict_data, frame_header,case, market, powertrain,car)
-    # return frame_data
-    # frame_data.to_csv("cadic_old.csv",index=None, header=None)
+    #frame_data.to_csv("cadic.csv",index=None, header=None)
     session, data, project_id, app_list=update_new(str(car).upper(),market,powertrain,case,frame_data,group_pick)
     return notice,session, data, project_id, app_list
 
@@ -382,9 +380,8 @@ def comment_nashi(col_opt_pick,row_opt,row_item,row_class,dict_kep):
                 string_comment=opt_item
 
             dic_opt[opt].append(string_comment)
-    sorted_dict = {k: dic_opt[k] for k in sorted(dic_opt)}
-    # print("sorted_dict: ",sorted_dict)
-    string_comment=str(sorted_dict)
+
+    string_comment=str(dic_opt)
     for sym in ["{","}","[","]","'"]:
         string_comment=string_comment.replace(sym,"")
 
@@ -516,10 +513,8 @@ def case_have_option(list_all_config,list_car,address_config_zone,
 def comment(dict_optioncode,config,dict_option,data_spec,max_car):
     for opt in dict_option.keys():
         if opt!="グレード選択":
-            dict_option[opt]=list(dict.fromkeys(dict_option[opt]))
-    sorted_dict = {k: dict_option[k] for k in sorted(dict_option)}
-    # print("sorted_dict: ",sorted_dict)
-    cmt=str(sorted_dict)
+            dict_option[opt]=list(dict.fromkeys(dict_option[opt]))      
+    cmt=str(dict_option)
 
     if dict_optioncode[config]=="":
         for sys in ["{","}","'",", グレード選択: 不問","[","]"]:
@@ -533,7 +528,7 @@ def comment(dict_optioncode,config,dict_option,data_spec,max_car):
                 value=data_spec[4+max_car][row_opcode]
                 if isinstance(value,str)==True and optioncode_config.find(value)!=-1:
                     cmt=cmt.replace("'"+key+"': "+str(dict_option[key]),value+":"+key+": "+str(dict_option[key]))
-
+        
         for sys in ["{","}","'",", グレード選択: 不問","[","]"]:
             cmt=cmt.replace(sys,"")
         return cmt
@@ -609,9 +604,9 @@ def edit_dataframe(my_dic_data, frame_header,develop_case, market, powertrain,pr
     header_query=get_header(project_name, market, powertrain, develop_case)
     if type(header_query)==type(None):
         result = pd.concat([frame_header, df_sorted], axis=0)
-        #print(result)
+        print(result)
     else:
-        # print(header_query)
+        print("vclllll",len(header_query.columns),len(df_sorted.columns))
         num_columns = len(header_query.columns)
         column_names = [f'{i + 1}' for i in range(num_columns)]
         header_query.columns = column_names
@@ -620,7 +615,7 @@ def edit_dataframe(my_dic_data, frame_header,develop_case, market, powertrain,pr
     result=result.reset_index(drop=True)
     result = pd.DataFrame(result.values, columns=None)
     data_new=merge_row_cadics(result)
-    #data_new.to_csv("data.csv")
+    data_new.to_csv("data.csv")
     return data_new
 
 
@@ -704,4 +699,4 @@ def get_group_karenhyo12(folder_data,car,folder_out,list_group):
 
 
 #================================TEST============================================================
-create_cadics_old(case="CASE1", market="JPN", powertrain="EV", car="WZ1J", list_group=["ALL"])
+#create_cadics(case="CASE1", market="JPN", powertrain="EV",car="WZ1J",list_group=["ALL"])

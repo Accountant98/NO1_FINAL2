@@ -15,7 +15,7 @@ from funtion_database import query_data
 from read_data_view import zip_folder
 #dic_test={ "XQ2":[1,"【サンプル】XXQ2関連表1_B(車体音振).xlsx","【サンプル】XXQ2関連表2_B(車体音振).xlsx","【サンプル】XXQ2関連表3_B(車体音振) .xlsx","【サンプル】XXQ2関連表4_B(車体音振) .xlsx",4,"【サンプル】仕様表_L21C.xlsx"],"XQ4":[1,"【サンプル】XXQ4関連表1_B(車体音振).xlsx","【サンプル】XXQ4関連表2_B(車体音振).xlsx","【サンプル】XXQ4関連表3_B(車体音振).xlsx","【サンプル】XXQ4関連表4_B(車体音振).xlsx",4,"【サンプル】仕様表_L21C.xlsx"]}
 
-def create_doc(case,plant,powertrain,car,list_group):
+def create_doc(case,plant,powertrain,car):
 #===========================load_infomation_input==========================
     working = os.path.dirname(__file__)
     folder_name=str(car).upper()+"_"+powertrain+"_"+plant+"_"+case
@@ -25,9 +25,8 @@ def create_doc(case,plant,powertrain,car,list_group):
     folder_out=folder_out.replace("\\","/")
     file_cadic=os.path.join(folder_out,"CADICS_ALL.csv")
     file_cadic=file_cadic.replace("\\","/")
-    tuple_group=tuple(list_group)
-    data_return=query_data(str(car).upper(),plant,powertrain,case,tuple_group,"ALL")
-    link_spec,dict_group_karenhyo3,dict_group_karenhyo4=get_group_karenhyo34(folder_data,car,list_group)
+    data_return=query_data(str(car).upper(),plant,powertrain,case,"ALL","ALL")
+    link_spec,dict_group_karenhyo3,dict_group_karenhyo4=get_group_karenhyo34(folder_data,car)
     if data_return[0]==None:
         return "Data cadics not exist in database!"
     if link_spec==None:
@@ -54,7 +53,6 @@ def create_doc(case,plant,powertrain,car,list_group):
     for group,link_kanrenhyo_3 in dict_group_karenhyo3.items():
         list_lot=get_lot_karen(link_kanrenhyo_3)
         for lot in list_lot:
-            #print(lot, group)
             #===================read input using pandas======================
             data_cadics = filter_cadic(lot, group,cadics_all,car_number) #filter cadics base on lot group
             sheet_name="関連表"+lot
@@ -253,31 +251,19 @@ def get_lot(link_kanrenhyo_3,link_kanrenhyo_4):
         list_lot.append(lot)
     return list_lot
 
-def get_group_karenhyo34(folder_data,car,list_group):
+def get_group_karenhyo34(folder_data,car):
     dic_group_karenhyo3={}
     dic_group_karenhyo4={}
     if os.path.exists(folder_data)==False:
         return None, dic_group_karenhyo3,dic_group_karenhyo4
-
-    list_file=[]
-    karen_files = [f for f in os.listdir(folder_data) if f.endswith('.xlsx')]
-    # files = [f for f in os.listdir(folder_data) if os.path.isfile(os.path.join(folder_data, f))]
-    if "ALL" not in list_group:
-        for item in list_group:
-            list_filename_contain_group = [file_name for file_name in karen_files if item in file_name]
-            list_file.extend(list_filename_contain_group)
-    else:
-        list_filename_contain_group = [file_name for file_name in karen_files]
-        list_file.extend(list_filename_contain_group)
-
-
+    files = [f for f in os.listdir(folder_data) if os.path.isfile(os.path.join(folder_data, f))]
     file_name_spec="仕様表_"+str(car).upper()+".xlsx"
     link_file_spec=os.path.join(folder_data,file_name_spec)
     link_file_spec=link_file_spec.replace("\\","/")
     if os.path.exists(link_file_spec)==False:
         link_file_spec=None
 
-    for file_name in list_file:
+    for file_name in files:
         if file_name.find("関連表3")==0:
             group=file_name.replace("関連表3","関連表1")
             link_file_karenhyo=os.path.join(folder_data,file_name)

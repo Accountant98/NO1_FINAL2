@@ -32,7 +32,7 @@ try:
             list_type=["admin","staff"]
         else:
             list_type=['staff']
-            
+
         local = grid(2,2,vertical_align="top")
         local.selectbox("Type Account:",list_type,key="type_acc")
         if st.session_state.position=='master':
@@ -50,24 +50,24 @@ try:
 
         with row_butt[1]:
             if st.button("View User",use_container_width=True):
-                xxx=get_all_user(st.session_state.project_query)
+                frame_user=get_all_user(st.session_state.project_query)
                 #df.to_csv(r"C:\Users\KNT19862\Desktop\WORK\NO1_FINAL\xxxx.csv")
-                xxx['Delete'] = False
-                xxx.rename(columns={0:"id"})
-                st.session_state.xxx=xxx
+                frame_user['Delete'] = False
+                frame_user.rename(columns={0: "id"})
+                st.session_state.frame_user=frame_user
                 #st.data_editor(st.session_state.xxx,num_rows="fix",disabled=["",'username', 'permission', 'project'], hide_index=True,key="yyy")
-        
-        try:
-            frame_edited=st.data_editor(st.session_state.xxx,num_rows="fix",disabled=["",'username', 'permission', 'project'], hide_index=True,key="yyy")
-            if st.button("DELETE ACCOUNT"):
-                with st.spinner(text="In progress..."):
-                    df_delete =frame_edited.loc[(frame_edited['Delete'] == True)&(frame_edited['username'] != st.session_state.name_user)]
-                    notice=delete_user(df_delete)
-                    st.write(notice)
-        except:
-            test=1
+
+        frame_edited=st.data_editor(st.session_state.frame_user, num_rows="fix", disabled=["", 'username', 'permission', 'project'], hide_index=True, key="yyy")
+        if st.button("DELETE ACCOUNT"):
+            with st.spinner(text="In progress..."):
+                df_delete =frame_edited.loc[frame_edited['Delete'] == True]
+                notice=delete_user(df_delete)
+                st.write(notice)
 except:
-    test=1
+    st.warning("Please login before running app!!!")
+
+
+    
 
             #         notice=delete_user(st.session_state.username_,st.session_state.type_acc)
             #         st.write(notice)

@@ -349,7 +349,7 @@ def update_new(project_name, market, power_train, develop_case, df, group):
     df.replace({np.nan: ''}, inplace=True)
     df['preventive_1'] = ''
     df['preventive_2'] = ''
-    #print("len: ",df.shape[1])
+    #rint("len: ",df.shape[1])
     existing_project = (session.query(Project).filter_by(project_name=project_name, power_train=power_train, market=market,
                develop_case=develop_case).first())
     #print("existing_project: ",existing_project)
@@ -381,7 +381,6 @@ def update_new(project_name, market, power_train, develop_case, df, group):
         for item in header_infor:
             item = (project_id,) + item
             #print("item: ", item)
-
             item_dict = {'id_project': item[0], **{f'col{i}': item[i] for i in range(1, len(item))}}
             header_instance = Header(**item_dict)
 
@@ -440,7 +439,7 @@ def update_new(project_name, market, power_train, develop_case, df, group):
         session.commit()
 
     session.close()
-    print("done")
+    #print("done")
     df = df.applymap(lambda x: replace_symbol(x) if isinstance(x, str) else x)
     return  session, df, project_id, app_list
     
@@ -694,6 +693,7 @@ def delete_user(df_delete):
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
+    df_delete
     for index, row in df_delete.iterrows():
         session.query(User.username,User.permission,User.project).filter_by(username=row["username"],permission=row["permission"],project=row["project"]).first()
         session.query(User).filter(User.username == row["username"], User.permission == row["permission"], User.project == row["project"]).delete()
@@ -713,8 +713,8 @@ def get_all_user(project):
     result=pd.DataFrame(result)
     if project!="ALL":
         result=result[(result["project"]==project)]
-    # else:
-    #     result=result[(result["project"]!=project)]
+    else:
+        result=result[(result["project"]!=project)]
     
     del result['password']
 
@@ -733,7 +733,7 @@ def get_header(project_name, market, powertrain, develop_case):
     if project is not None:
         id_project = project.id_project
         min_id = session.query(func.min(MainTable.id)).filter(MainTable.id_project == id_project).scalar()
-        print("min_id: ", min_id)
+        # print("min_id: ", min_id)
         header_query = session.query(Header).filter_by(id_project=id_project).all()
         header_data = [row.__dict__ for row in header_query]
         header_df = pd.DataFrame.from_records(header_data)
@@ -773,7 +773,7 @@ def query_data(project_name, market, powertrain, develop_case, group, lot):
         id_project = project.id_project
         sum_config = session.query(func.count(App.app)).filter_by(project_id=id_project).first()[0]
         min_id = session.query(func.min(MainTable.id)).filter(MainTable.id_project == id_project).scalar()
-        print("min_id: ", min_id)
+        # print("min_id: ", min_id)
 
         header_query = session.query(Header).filter_by(id_project=id_project).all()
         header_data = [row.__dict__ for row in header_query]

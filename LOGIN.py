@@ -21,6 +21,7 @@ if st.button("Login"):
         st.session_state.name_user=name_user
         st.session_state.project_query=project_query
         st.success("Login successful!")
+        st.switch_page("pages/APP PAGE.py")
     else:
         st.session_state.position=None
         st.error("Login failed. Please check your credentials.")
